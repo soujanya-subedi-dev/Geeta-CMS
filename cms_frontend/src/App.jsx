@@ -1,43 +1,54 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home";
-import BlogList from "./pages/BlogList";
-import BlogDetail from "./pages/BlogDetail";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import EventList from "./pages/EventList";
-import EventDetail from "./pages/EventDetail";
-import TestimonialList from "./pages/TestimonialList";
-import TestimonialDetail from "./pages/TestimonialDetail";
-import NoticeList from "./pages/NoticeList";
-import NoticeDetail from "./pages/NoticeDetail";
-import { AuthProvider } from "./contexts/AuthContext";
-import Navbar from "./components/Navbar";
+import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { Route, Routes } from "react-router-dom";
+
+import Navbar from "./components/Navbar.jsx";
+import Footer from "./components/Footer.jsx";
+import Blog from "./pages/Blog.jsx";
+import BlogDetail from "./pages/BlogDetail.jsx";
+import Events from "./pages/Events.jsx";
+import EventDetail from "./pages/EventDetail.jsx";
+import Testimonials from "./pages/Testimonials.jsx";
+import TestimonialDetail from "./pages/TestimonialDetail.jsx";
+import Notices from "./pages/Notices.jsx";
+import NoticeDetail from "./pages/NoticeDetail.jsx";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: "Inter, sans-serif",
+    h1: { fontFamily: "Poppins, sans-serif" },
+    h2: { fontFamily: "Poppins, sans-serif" },
+    h3: { fontFamily: "Poppins, sans-serif" },
+    h4: { fontFamily: "Poppins, sans-serif" },
+  },
+  palette: {
+    primary: { main: "#1E40AF" },
+    secondary: { main: "#F59E0B" },
+    background: { default: "#f9fafb" },
+  },
+});
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div className="min-h-screen flex flex-col bg-gray-50 text-gray-800">
         <Navbar />
-        <Routes>
-            <Route path="/" element={<Home />} />
-            
-            <Route path="/blogs" element={<BlogList />} />
-            <Route path="/blogs/:slug" element={<BlogDetail />} />
-
-            <Route path="/events" element={<EventList />} />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Blog />} />
+            <Route path="/blog" element={<Blog />} />
+            <Route path="/blog/:slug" element={<BlogDetail />} />
+            <Route path="/events" element={<Events />} />
             <Route path="/events/:id" element={<EventDetail />} />
-
-            <Route path="/testimonials" element={<TestimonialList />} />
+            <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/testimonials/:id" element={<TestimonialDetail />} />
-
-            <Route path="/notices" element={<NoticeList />} />
+            <Route path="/notices" element={<Notices />} />
             <Route path="/notices/:id" element={<NoticeDetail />} />
-
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+          </Routes>
+        </main>
+        <Footer />
+      </div>
+    </ThemeProvider>
   );
 }
 
