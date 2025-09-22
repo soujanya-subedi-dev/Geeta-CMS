@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.text import slugify
 
@@ -7,10 +8,16 @@ def blog_image_path(instance, filename):
 
 
 class Blog(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="blogs",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
-    image = models.ImageField(upload_to=blog_image_path, blank=True, null=True)
-    author = models.CharField(max_length=255)
+    featured_image = models.ImageField(upload_to=blog_image_path, blank=True, null=True)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -35,13 +42,17 @@ class Blog(models.Model):
 
 class Comment(models.Model):
     blog = models.ForeignKey(Blog, related_name="comments", on_delete=models.CASCADE)
-    name = models.CharField(max_length=150)
-    email = models.EmailField()
-    message = models.TextField()
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name="comments", on_delete=models.SET_NULL, null=True
+    )
+    content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    approved = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
 
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"Comment by {self.email}"
+        user_display = self.user.get_username() if self.user else "Unknown"
+        return f"Comment by {user_display}"

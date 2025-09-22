@@ -30,9 +30,8 @@ function Events() {
       ) : (
         <CardList
           items={events}
-          renderMeta={(item) => new Date(item.date).toLocaleDateString()}
+          renderMeta={(item) => `${new Date(item.start).toLocaleString()}${item.location ? ` • ${item.location}` : ""}`}
           getDescription={getDescription}
-          getImage={(item) => item.image}
           getTitle={(item) => item.title}
           getLink={(item) => `/events/${item.id}`}
           actionLabel="View event"
