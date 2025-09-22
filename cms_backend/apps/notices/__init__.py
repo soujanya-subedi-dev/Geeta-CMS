@@ -1,0 +1,1 @@
+"""Notices application package."""

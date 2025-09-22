@@ -1,26 +1,63 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../api/axios";
 
-const TestimonialDetail = () => {
+import client from "../api/client.js";
+import DetailLayout from "../layouts/DetailLayout.jsx";
+
+function TestimonialDetail() {
   const { id } = useParams();
   const [testimonial, setTestimonial] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    API.get(`testimonials/${id}/`)
-      .then(res => setTestimonial(res.data))
-      .catch(err => console.log(err));
+    if (!id) return;
+    client
+      .get(`testimonials/${id}/`)
+      .then((response) => setTestimonial(response.data))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (!testimonial) return <div>Loading...</div>;
+  const meta = useMemo(() => {
+    if (!testimonial) return "";
+    return testimonial.designation || "Geeta Aviation";
+  }, [testimonial]);
+
+  const formattedContent = useMemo(() => {
+    if (!testimonial?.message) return "";
+    return testimonial.message.replace(/\n/g, "<br />");
+  }, [testimonial]);
+
+  if (loading) {
+    return <div className="py-24 text-center text-gray-500">Loading testimonial...</div>;
+  }
+
+  if (!testimonial) {
+    return <div className="py-24 text-center text-gray-500">Testimonial not found.</div>;
+  }
+
+  const actions = testimonial.video_link
+    ? [
+        <a
+          key="watch"
+          href={testimonial.video_link}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center rounded-lg bg-amber-500 px-5 py-2 text-white font-semibold hover:bg-amber-600"
+        >
+          Watch video
+        </a>,
+      ]
+    : null;
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-2">{testimonial.name}</h1>
-      {testimonial.photo && <img src={testimonial.photo} alt={testimonial.name} className="mb-4 w-48 h-48 object-cover rounded-full" />}
-      <p>{testimonial.message}</p>
-    </div>
+    <DetailLayout
+      title={testimonial.name}
+      image={testimonial.image}
+      meta={meta}
+      content={formattedContent}
+      actions={actions}
+    />
   );
-};
+}
 
 export default TestimonialDetail;
