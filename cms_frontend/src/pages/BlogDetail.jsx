@@ -13,7 +13,7 @@ function BlogDetail() {
   useEffect(() => {
     if (!slug) return;
     client
-      .get(`blog/${slug}/`)
+      .get(`blogs/${slug}/`)
       .then((response) => setBlog(response.data))
       .finally(() => setLoading(false));
   }, [slug]);
@@ -21,7 +21,7 @@ function BlogDetail() {
   const meta = useMemo(() => {
     if (!blog) return "";
     const created = new Date(blog.created_at).toLocaleDateString();
-    return `Written by ${blog.author} • ${created}`;
+    return `Written by ${blog.author || "Geeta Aviation"} • ${created}`;
   }, [blog]);
 
   const formattedContent = useMemo(() => {
@@ -30,25 +30,16 @@ function BlogDetail() {
   }, [blog]);
 
   if (loading) {
-    return (
-      <div className="py-24 text-center text-gray-500">Loading article...</div>
-    );
+    return <div className="py-24 text-center text-gray-500">Loading article...</div>;
   }
 
   if (!blog) {
-    return (
-      <div className="py-24 text-center text-gray-500">Blog post not found.</div>
-    );
+    return <div className="py-24 text-center text-gray-500">Blog post not found.</div>;
   }
 
   return (
-    <DetailLayout
-      title={blog.title}
-      image={blog.image}
-      meta={meta}
-      content={formattedContent}
-    >
-      <Comments blogId={blog.id} />
+    <DetailLayout title={blog.title} image={blog.featured_image} meta={meta} content={formattedContent}>
+      <Comments blogSlug={blog.slug} />
     </DetailLayout>
   );
 }
