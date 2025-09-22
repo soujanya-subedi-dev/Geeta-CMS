@@ -6,14 +6,14 @@ from .models import Blog, Comment
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
     list_display = ("title", "author", "created_at", "updated_at")
-    search_fields = ("title", "author")
+    search_fields = ("title", "author__username")
     prepopulated_fields = {"slug": ("title",)}
     list_filter = ("created_at",)
 
 
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ("blog", "email", "created_at")
-    search_fields = ("blog__title", "email", "name")
-    list_filter = ("created_at",)
-    autocomplete_fields = ("blog",)
+    list_display = ("blog", "user", "approved", "rejected", "created_at")
+    search_fields = ("blog__title", "user__username", "content")
+    list_filter = ("created_at", "approved", "rejected")
+    autocomplete_fields = ("blog", "user")
