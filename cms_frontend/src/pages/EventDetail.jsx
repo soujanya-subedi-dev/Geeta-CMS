@@ -1,28 +1,68 @@
-import { useEffect, useState } from "react";
+import { Alert } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../api/axios";
+
+import DetailLayout from "../layouts/DetailLayout.jsx";
+import api from "../api/client.js";
 
 const EventDetail = () => {
   const { id } = useParams();
   const [event, setEvent] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    API.get(`events/${id}/`)
-      .then(res => setEvent(res.data))
-      .catch(err => console.log(err));
+    const fetchEvent = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await api.get(`events/${id}/`);
+        setEvent(data);
+      } catch (err) {
+        setError("The requested event could not be found.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvent();
   }, [id]);
 
-  if (!event) return <div>Loading...</div>;
+  const meta = useMemo(() => {
+    if (!event) return [];
+    const date = event.date
+      ? new Date(event.date).toLocaleDateString(undefined, { dateStyle: "long" })
+      : "Date to be announced";
+    return [date, event.location && `Location: ${event.location}`].filter(Boolean);
+  }, [event]);
+
+  const links = useMemo(() => {
+    if (!event?.registration_link) return [];
+    return [
+      {
+        label: "Register Now",
+        href: event.registration_link,
+      },
+    ];
+  }, [event]);
+
+  const htmlContent = useMemo(() => {
+    if (!event?.description) return "";
+    return event.description.replace(/\n/g, "<br />");
+  }, [event]);
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
-      {event.image && <img src={event.image} alt={event.title} className="mb-4 w-full rounded" />}
-      <p className="mb-2">{event.description}</p>
-      <p><strong>Start:</strong> {new Date(event.start_datetime).toLocaleString()}</p>
-      {event.end_datetime && <p><strong>End:</strong> {new Date(event.end_datetime).toLocaleString()}</p>}
-      {event.location && <p><strong>Location:</strong> {event.location}</p>}
-    </div>
+    <DetailLayout
+      title={event?.title}
+      meta={meta}
+      image={event?.image}
+      content={htmlContent}
+      links={links}
+      loading={loading}
+    />
   );
 };
 

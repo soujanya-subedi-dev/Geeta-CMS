@@ -1,1 +1,33 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap");
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+:root {
+  color: #1f2937;
+  background-color: #f9fafb;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+h1,
+.h-heading {
+  font-family: "Poppins", "Inter", system-ui, sans-serif;
+}
+
+main {
+  min-height: 70vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.prose {
+  max-width: none;
+}

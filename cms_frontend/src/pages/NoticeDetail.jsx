@@ -1,26 +1,67 @@
-import { useEffect, useState } from "react";
+import { Alert } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../api/axios";
+
+import DetailLayout from "../layouts/DetailLayout.jsx";
+import api from "../api/client.js";
 
 const NoticeDetail = () => {
   const { id } = useParams();
   const [notice, setNotice] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    API.get(`notices/${id}/`)
-      .then(res => setNotice(res.data))
-      .catch(err => console.log(err));
+    const fetchNotice = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await api.get(`notices/${id}/`);
+        setNotice(data);
+      } catch (err) {
+        setError("This notice is no longer available.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotice();
   }, [id]);
 
-  if (!notice) return <div>Loading...</div>;
+  const meta = useMemo(() => {
+    if (!notice) return [];
+    const published = notice.published_date
+      ? new Date(notice.published_date).toLocaleDateString(undefined, { dateStyle: "long" })
+      : undefined;
+    return [published && `Published ${published}`].filter(Boolean);
+  }, [notice]);
+
+  const links = useMemo(() => {
+    if (!notice?.attachment) return [];
+    return [
+      {
+        label: "Download Attachment",
+        href: notice.attachment,
+      },
+    ];
+  }, [notice]);
+
+  const htmlContent = useMemo(() => {
+    if (!notice?.description) return "";
+    return notice.description.replace(/\n/g, "<br />");
+  }, [notice]);
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-2">{notice.title}</h1>
-      <p><strong>Published:</strong> {notice.published_date}</p>
-      {notice.expires_at && <p><strong>Expires:</strong> {notice.expires_at}</p>}
-      {notice.file && <a href={notice.file} target="_blank" className="text-blue-500 hover:underline">Download File</a>}
-    </div>
+    <DetailLayout
+      title={notice?.title}
+      meta={meta}
+      content={htmlContent}
+      links={links}
+      loading={loading}
+    />
   );
 };
 

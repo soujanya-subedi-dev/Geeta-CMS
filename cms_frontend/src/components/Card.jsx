@@ -1,22 +1,45 @@
+import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
+import { Button, Card as MuiCard, CardActionArea, CardContent, CardMedia, Stack, Typography } from "@mui/material";
+import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-const Card = ({ item, type }) => {
-  // type = "blog" | "event" | "testimonial" | "notice"
-  const title = item.title || item.name;
-  const excerpt = item.excerpt || item.description || item.message || "";
-  const image = item.featured_image || item.image || item.photo || null;
-  const slug = item.slug || item.id;
+const Card = ({ title, subtitle, description, image, to, actionText = "View Details" }) => (
+  <MuiCard className="rounded-3xl shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-100">
+    <CardActionArea component={Link} to={to} className="flex flex-col h-full">
+      {image && (
+        <CardMedia component="img" height="200" image={image} alt={title} className="object-cover" loading="lazy" />
+      )}
+      <CardContent className="flex flex-col gap-4 flex-1">
+        <Stack spacing={1}>
+          {subtitle && (
+            <Typography variant="caption" className="text-amber-500 font-semibold uppercase tracking-wider">
+              {subtitle}
+            </Typography>
+          )}
+          <Typography variant="h6" component="h3" className="font-semibold text-gray-900">
+            {title}
+          </Typography>
+          {description && (
+            <Typography variant="body2" className="text-gray-600 line-clamp-3">
+              {description}
+            </Typography>
+          )}
+        </Stack>
+        <Button endIcon={<ArrowOutwardIcon />} color="primary" className="self-start" sx={{ mt: "auto" }}>
+          {actionText}
+        </Button>
+      </CardContent>
+    </CardActionArea>
+  </MuiCard>
+);
 
-  return (
-    <div className="border rounded-lg p-4 shadow hover:shadow-lg transition">
-      {image && <img src={image} alt={title} className="mb-2 w-full h-48 object-cover rounded" />}
-      <h2 className="text-xl font-bold mb-2">{title}</h2>
-      <p className="mb-2">{excerpt.length > 100 ? excerpt.slice(0, 100) + "..." : excerpt}</p>
-      <Link to={`/${type}/${slug}`} className="text-blue-500 hover:underline">
-        Read More
-      </Link>
-    </div>
-  );
+Card.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  description: PropTypes.string,
+  image: PropTypes.string,
+  to: PropTypes.string.isRequired,
+  actionText: PropTypes.string,
 };
 
 export default Card;

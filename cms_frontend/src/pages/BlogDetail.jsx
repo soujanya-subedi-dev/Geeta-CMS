@@ -1,56 +1,64 @@
-import { useEffect, useState, useContext } from "react";
+import { Alert } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
-import API from "../api/axios";
-import { AuthContext } from "../contexts/AuthContext";
+
+import Comments from "../components/Comments.jsx";
+import DetailLayout from "../layouts/DetailLayout.jsx";
+import api from "../api/client.js";
 
 const BlogDetail = () => {
   const { slug } = useParams();
-  const { user } = useContext(AuthContext);
   const [blog, setBlog] = useState(null);
-  const [comment, setComment] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const fetchBlog = async () => {
-    try {
-      const res = await API.get(`blogs/${slug}/`);
-      setBlog(res.data);
-    } catch (err) { console.log(err); }
-  };
+  useEffect(() => {
+    const fetchBlog = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await api.get(`blog/${slug}/`);
+        setBlog(data);
+      } catch (err) {
+        setError("Unable to load this article. It may have been unpublished or removed.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBlog();
+  }, [slug]);
 
-  useEffect(() => { fetchBlog(); }, [slug]);
+  const meta = useMemo(() => {
+    if (!blog) return [];
+    const published = blog.created_at ? new Date(blog.created_at).toLocaleDateString() : undefined;
+    const updated =
+      blog.updated_at && blog.updated_at !== blog.created_at
+        ? new Date(blog.updated_at).toLocaleDateString()
+        : undefined;
+    return [blog.author && `By ${blog.author}`, published && `Published ${published}`, updated && `Updated ${updated}`].filter(
+      Boolean
+    );
+  }, [blog]);
 
-  const handleComment = async (e) => {
-    e.preventDefault();
-    try {
-      await API.post("comments/", { blog: blog.id, text: comment });
-      setComment("");
-      fetchBlog();
-    } catch (err) { console.log(err); alert("Login required to comment"); }
-  };
+  const htmlContent = useMemo(() => {
+    if (!blog?.content) return "";
+    return blog.content.replace(/\n/g, "<br />");
+  }, [blog]);
 
-  if (!blog) return <div>Loading...</div>;
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-2">{blog.title}</h1>
-      {blog.featured_image && <img src={blog.featured_image} alt={blog.title} className="mb-4 w-full rounded"/>}
-      <p className="mb-4">{blog.content}</p>
-
-      <div className="mt-6">
-        <h2 className="text-xl font-bold mb-2">Comments</h2>
-        <form onSubmit={handleComment} className="flex flex-col gap-2 mb-4">
-          <textarea value={comment} onChange={e=>setComment(e.target.value)} placeholder="Write a comment" className="border p-2 rounded"/>
-          <button type="submit" className="bg-blue-500 text-white p-2 rounded">Submit</button>
-        </form>
-
-        {blog.comments.length === 0 && <p>No comments yet</p>}
-        {blog.comments.map(c => (
-          <div key={c.id} className="border p-2 rounded mb-2">
-            <p className="font-bold">{c.user || "Anonymous"}</p>
-            <p>{c.text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
+    <DetailLayout
+      title={blog?.title}
+      meta={meta}
+      image={blog?.image}
+      content={htmlContent}
+      loading={loading}
+    >
+      {blog && <Comments blogId={blog.id} initialComments={blog.comments ?? []} />}
+    </DetailLayout>
   );
 };
 
