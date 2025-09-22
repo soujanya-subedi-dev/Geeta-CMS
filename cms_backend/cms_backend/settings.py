@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_filters",
 
+    "apps.accounts",
     "apps.blog",
     "apps.events",
     "apps.testimonials",

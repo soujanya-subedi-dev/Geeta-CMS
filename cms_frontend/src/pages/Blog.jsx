@@ -10,7 +10,7 @@ function Blog() {
 
   useEffect(() => {
     client
-      .get("blog/")
+      .get("blogs/")
       .then((response) => setBlogs(response.data.results || response.data))
       .finally(() => setLoading(false));
   }, []);
@@ -32,9 +32,9 @@ function Blog() {
           items={blogs}
           renderMeta={(item) => new Date(item.created_at).toLocaleDateString()}
           getDescription={getExcerpt}
-          getImage={(item) => item.image}
+          getImage={(item) => item.featured_image}
           getTitle={(item) => item.title}
-          getLink={(item) => `/blog/${item.slug}`}
+          getLink={(item) => `/blogs/${item.slug}`}
         />
       )}
     </ListLayout>

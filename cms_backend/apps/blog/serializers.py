@@ -4,14 +4,19 @@ from .models import Blog, Comment
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField(read_only=True)
+
     class Meta:
         model = Comment
-        fields = ["id", "blog", "name", "email", "message", "created_at"]
-        read_only_fields = ["id", "created_at"]
+        fields = ["id", "blog", "user", "content", "created_at", "approved", "rejected"]
+        read_only_fields = ["id", "created_at", "approved", "rejected", "user", "blog"]
+        extra_kwargs = {"content": {"required": True}}
 
 
 class BlogSerializer(serializers.ModelSerializer):
     comments = CommentSerializer(many=True, read_only=True)
+    author = serializers.StringRelatedField(read_only=True)
+    comments_count = serializers.IntegerField(source="comments.count", read_only=True)
 
     class Meta:
         model = Blog
@@ -19,11 +24,20 @@ class BlogSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "slug",
-            "image",
+            "featured_image",
             "author",
             "content",
             "created_at",
             "updated_at",
             "comments",
+            "comments_count",
         ]
-        read_only_fields = ["id", "created_at", "updated_at", "slug", "comments"]
+        read_only_fields = [
+            "id",
+            "created_at",
+            "updated_at",
+            "slug",
+            "comments",
+            "comments_count",
+            "author",
+        ]

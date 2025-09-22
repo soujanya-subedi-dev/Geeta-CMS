@@ -7,4 +7,23 @@ const client = axios.create({
   },
 });
 
+client.interceptors.request.use((config) => {
+  if (typeof window === "undefined") {
+    return config;
+  }
+  const raw = window.localStorage.getItem("geeta_cms_auth");
+  if (raw) {
+    try {
+      const { access } = JSON.parse(raw);
+      if (access) {
+        // eslint-disable-next-line no-param-reassign
+        config.headers.Authorization = `Bearer ${access}`;
+      }
+    } catch (error) {
+      console.warn("Unable to parse auth token", error);
+    }
+  }
+  return config;
+});
+
 export default client;

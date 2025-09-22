@@ -1,9 +1,13 @@
 from rest_framework.routers import DefaultRouter
 
-from .views import BlogViewSet, CommentViewSet
+from django.urls import path
+from .views import BlogViewSet, CommentViewSet, HomeSummaryView
 
 router = DefaultRouter()
-router.register(r"blog", BlogViewSet, basename="blog")
+router.register(r"blogs", BlogViewSet, basename="blogs")
 router.register(r"comments", CommentViewSet, basename="comments")
 
-urlpatterns = router.urls
+urlpatterns = [
+    path("home/summary/", HomeSummaryView.as_view(), name="home-summary"),
+]
+urlpatterns += router.urls
